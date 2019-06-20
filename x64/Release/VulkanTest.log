@@ -1,8 +1,0 @@
-﻿  gameManager.cpp
-  vulkanAPI.cpp
-  Generating code
-  188 of 2660 functions ( 7.1%) were compiled, the rest were copied from previous compilation.
-    80 functions were new in current compilation
-    144 functions had inline decision re-evaluated but remain unchanged
-  Finished generating code
-  VulkanTest.vcxproj -> D:\Vulkan\x64\Release\VulkanTest.exe
