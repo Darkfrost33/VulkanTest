@@ -2,6 +2,10 @@
 *.d
 
 # Compiled Object files
+x64
+x86
+Debug
+Release
 *.slo
 *.lo
 *.o
