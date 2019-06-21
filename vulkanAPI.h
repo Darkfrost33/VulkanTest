@@ -4,6 +4,9 @@
 struct QueueFamilyIndices;
 struct SwapChainSupportDetails;
 class Transform;
+
+const size_t TEXTURE_COUNT = 3;
+
 struct VertexData {
 	glm::vec3 pos;
 	glm::vec3 normal;
@@ -43,30 +46,44 @@ struct UniformBufferObject {
 struct DynamicUBO {
 	glm::mat4 *model = nullptr;
 	static size_t DU_Alignment;
-	std::unordered_map<glm::mat4*, Transform*> inversePtr;
-	size_t lastIndex = 0;
+	std::vector<Transform*> inversePtr;
+	//size_t lastIndex = 0;
 
 	glm::mat4* GetAvailableModel(Transform* pTr)
 	{
-		glm::mat4* m = (glm::mat4*)(((uint64_t)model + (lastIndex * DU_Alignment)));
-		inversePtr[m] = pTr;
-		lastIndex++;
+		glm::mat4* m = (glm::mat4*)(((uint64_t)model + (inversePtr.size() * DU_Alignment)));
+		inversePtr.push_back(pTr);
+		//inversePtr[m] = pTr;
+		//lastIndex++;
 		return m;
 	}
 
 	void DeleteModel(glm::mat4* m)
 	{
-		glm::mat4* lastModel = (glm::mat4*)(((uint64_t)model + ((lastIndex-1) * DU_Alignment)));
+		glm::mat4* lastModel = (glm::mat4*)(((uint64_t)model + ((inversePtr .size()-1) * DU_Alignment)));
+		size_t index = ((uint64_t)m - (uint64_t)model) / DU_Alignment;
 
 		if (m != lastModel) {
 			*m = *lastModel;
-			inversePtr[lastModel]->transMatrix = m;
-			inversePtr[m] = inversePtr[lastModel];
-			inversePtr.erase(lastModel);
+			inversePtr.back()->transMatrix = m;
+			inversePtr[index] = inversePtr.back();
+			//inversePtr[m] = inversePtr[lastModel];
+			//inversePtr.erase(lastModel);
 		}
-		*lastModel = glm::mat4(1.0f);
-		lastIndex--;
+		inversePtr.resize(inversePtr.size() - 1);
+		//*lastModel = glm::mat4(1.0f);
+		//lastIndex--;
 	}
+};
+
+struct TextureInfo
+{
+	VkImage textureImage;
+	uint32_t mipLevels;
+	VkDeviceMemory textureImageMemory;
+	VkImageView textureImageView;
+	VkSampler* textureSampler;
+	VkDescriptorSet descriptorSet;
 };
 
 class VulkanAPI:public Singleton<VulkanAPI>
@@ -76,6 +93,9 @@ public:
 	void initVulkan();
 	void draw();
 	void cleanup();
+
+	uint32_t UploadTexture(std::string path);
+
 	GLFWwindow* pWindow;
 	glm::mat4* cameraTransform = nullptr;
 	glm::vec3 cameraOffset;
@@ -117,15 +137,18 @@ private:
 	//std::vector<VkPushConstantRange> pushContantRange;
 
 	VkRenderPass renderPass;
-	VkDescriptorSetLayout descriptorSetLayout;
 	VkPipelineLayout pipelineLayout;
 	VkPipeline graphicsPipeline;
 
 	VkCommandPool commandPool;
 	std::vector<VkCommandBuffer> commandBuffers;
 
+	VkDescriptorSetLayout descriptorSetLayout;
+	VkDescriptorSetLayout textureDescriptorSetLayout;
 	VkDescriptorPool descriptorPool;
+	VkDescriptorPool textureDescriptorPool;
 	std::vector<VkDescriptorSet> descriptorSets;
+	//VkDescriptorSet textureDescriptorSets;
 
 	std::vector<VkSemaphore> imageAvailableSemaphores;
 	std::vector<VkSemaphore> renderFinishedSemaphores;
@@ -136,11 +159,15 @@ private:
 	//std::vector<uint32_t> indices;
 	std::vector<InstanceData> instanceDatas;
 
-	uint32_t mipLevels;
-	VkImage textureImage;
-	VkDeviceMemory textureImageMemory;
-	VkImageView textureImageView;
-	VkSampler textureSampler;
+	//uint32_t mipLevels;
+	//VkImage textureImage;
+	//VkDeviceMemory textureImageMemory;
+	//VkImageView textureImageView;
+	//VkSampler textureSampler;
+
+	std::vector<TextureInfo> textureInfos;
+	std::unordered_map<uint32_t, VkSampler> textureSamplers;
+
 	VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 	VkImage colorImage;
 	VkDeviceMemory colorImageMemory;
@@ -166,15 +193,16 @@ private:
 	void createColorResource();
 	void createDepthResource();
 	void createFramebuffers();
-	void createTextureImage();
-	void createTextureImageView();
-	void createTextureSampler();
+	//void createTextureImage();
+	//void createTextureImageView();
+	VkSampler* createTextureSampler(uint32_t mipLevels);
 	void createPushConstants();
 	void createVertexIndexBuffer();
 	void createInstanceBuffer();
 	void createDynamicModels();
 	void createUniformBuffers();
 	void createDescriptorPool();
+	void createTextureDescriptorPool();
 	void createDescriptorSet();
 	void createCommandBuffers();
 	void createSyncObjects();

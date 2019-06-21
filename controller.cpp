@@ -62,6 +62,7 @@ void Controller::Update(float deltaTime)
 			ComponentManager::GetInstance()->activeComponents[TRANSFORM].size()*5 * sinf(0.0f),
 			0);
 
+		ComponentManager::GetInstance()->mTransforms[newComponent].GetTextureID("Textures/texture.jpg");
 		newComponent = ComponentManager::GetInstance()->newComponent(newGameObjectID, MESH);
 		ComponentManager::GetInstance()->mMeshes[newComponent].BindMesh("box");
 
@@ -75,7 +76,8 @@ void Controller::Update(float deltaTime)
 			ComponentManager::GetInstance()->activeComponents[TRANSFORM].size() * 5 * cosf(0.0f),
 			ComponentManager::GetInstance()->activeComponents[TRANSFORM].size() * 5 * sinf(0.0f),
 			0);
-
+		ComponentManager::GetInstance()->mTransforms[newComponent].localScale = glm::vec3(2.0f, 2.0f, 2.0f);
+		ComponentManager::GetInstance()->mTransforms[newComponent].GetTextureID("Textures/2k_earth.jpg");
 		newComponent = ComponentManager::GetInstance()->newComponent(newGameObjectID, MESH);
 		ComponentManager::GetInstance()->mMeshes[newComponent].BindMesh("sphere");
 
@@ -90,7 +92,8 @@ void Controller::Update(float deltaTime)
 			ComponentManager::GetInstance()->activeComponents[TRANSFORM].size() * 5 * cosf(0.0f),
 			ComponentManager::GetInstance()->activeComponents[TRANSFORM].size() * 5 * sinf(0.0f),
 			0);
-
+		ComponentManager::GetInstance()->mTransforms[newComponent].localScale = glm::vec3(4.0f, 4.0f, 4.0f);
+		ComponentManager::GetInstance()->mTransforms[newComponent].GetTextureID("Textures/chalet.jpg");
 		newComponent = ComponentManager::GetInstance()->newComponent(newGameObjectID, MESH);
 		ComponentManager::GetInstance()->mMeshes[newComponent].BindMesh("house");
 
@@ -100,6 +103,8 @@ void Controller::Update(float deltaTime)
 	if (Input_Manager::GetInstance()->IsTriggered(VK_L))
 	{
 		//uint32_t index = std::max(std::rand()%ComponentManager::GetInstance()->activeComponents[TRANSFORM].size(), (uint64_t)1);
+		if (ComponentManager::GetInstance()->activeComponents[TRANSFORM].size() <= 1)
+			return;
 		auto ii = ComponentManager::GetInstance()->activeComponents[TRANSFORM].begin();
 		ii++;
 		uint32_t index = *ii;

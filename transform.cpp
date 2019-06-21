@@ -2,6 +2,7 @@
 #include "transform.h"
 #include "vulkanAPI.h"
 #include "componentManager.h"
+#include "ResourceManager.h"
 
 Transform::Transform():parent(-1), worldPosition(0.0f), localPosition(0.0f), worldScale(1.0f), localScale(1.0f)
 {
@@ -9,6 +10,7 @@ Transform::Transform():parent(-1), worldPosition(0.0f), localPosition(0.0f), wor
 	dirty = true;
 	mMesh = nullptr;
 	transMatrix = nullptr;
+	textureID = 0;
 }
 
 void Transform::Start()
@@ -60,5 +62,11 @@ void Transform::Initialize()
 		delete transMatrix;
 		transMatrix = nullptr;
 	}
+	textureID = 0;
 	dirty = true;
+}
+
+void Transform::GetTextureID(std::string path)
+{
+	textureID = ResourceManager::GetInstance()->LoadTexture(path);
 }

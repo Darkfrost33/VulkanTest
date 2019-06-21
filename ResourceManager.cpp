@@ -4,8 +4,6 @@
 #include "ResourceManager.h"
 #include "vulkanAPI.h"
 
-const std::string MODEL_PATH = "Models/chalet.obj";
-
 namespace std {
 	template<> struct hash<VertexData> {
 		size_t operator()(VertexData const& vertex) const {
@@ -31,9 +29,6 @@ void MathPrint(glm::mat4 m)
 
 ResourceManager::ResourceManager()
 {
-	mMeshes["box"] = BoxMesh();
-	mMeshes["sphere"] = SphereMesh();
-	mMeshes["house"] = LoadModel("house", MODEL_PATH);
 }
 ResourceManager::~ResourceManager()
 {
@@ -42,6 +37,21 @@ ResourceManager::~ResourceManager()
 		delete mesh.second;
 	}
 	mMeshes.clear();
+	mTextures.clear();
+}
+
+void ResourceManager::Initialize_Models()
+{
+	mMeshes["box"] = BoxMesh();
+	mMeshes["sphere"] = SphereMesh();
+	mMeshes["house"] = LoadModel("house", "Models/chalet.obj");
+}
+
+void ResourceManager::Initialize_Textures()
+{
+	LoadTexture("Textures/texture.jpg");
+	LoadTexture("Textures/2k_earth.jpg");
+	LoadTexture("Textures/chalet.jpg");
 }
 
 MeshData * ResourceManager::LoadModel(std::string name, std::string path)
@@ -93,8 +103,21 @@ MeshData * ResourceManager::LoadModel(std::string name, std::string path)
 			meshdata->indices.push_back(uniqueVertices[vertex]);
 		}
 	}
-	std::cout << meshdata->vertices.size() << std::endl;
+	std::cout << "vertices count: " << meshdata->vertices.size() << std::endl;
+	std::cout << "face count: " << meshdata->indices.size()/3 << std::endl;
 	return meshdata;
+}
+
+uint32_t ResourceManager::LoadTexture(std::string path)
+{
+	if (mTextures.find(path) != mTextures.end())
+	{
+		return mTextures[path];
+	}
+
+	mTextures[path] = VulkanAPI::GetInstance()->UploadTexture(path);
+
+	return mTextures[path];
 }
 
 MeshData* ResourceManager::BoxMesh()

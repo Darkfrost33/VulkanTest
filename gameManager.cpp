@@ -26,13 +26,14 @@ void GameManager::initiate()
 {
 	std::srand(std::time(nullptr));
 	pResourceManager = ResourceManager::GetInstance();
+	pResourceManager->Initialize_Models();
 	pFRC = new FrameRateController(0);
 	pInputManager = Input_Manager::GetInstance();
 	pComponentManager = ComponentManager::GetInstance();
 	pGraphics = VulkanAPI::GetInstance();
 	pGraphics->initWindow();
 	pGraphics->initVulkan();
-
+	pResourceManager->Initialize_Textures();
 	CreateGameObjects();
 }
 

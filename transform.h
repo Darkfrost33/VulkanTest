@@ -12,6 +12,7 @@ public:
 	void Serialize(XMLElement* _element) override;
 	void Initialize() override;
 
+	void GetTextureID(std::string path);
 	uint32_t parent;
 	std::set<unsigned> childrenID;
 	bool dirty;
@@ -24,4 +25,5 @@ public:
 	glm::mat4* transMatrix;
 
 	MeshData* mMesh;
+	uint32_t textureID;
 };
