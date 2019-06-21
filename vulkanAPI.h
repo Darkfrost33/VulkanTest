@@ -47,14 +47,11 @@ struct DynamicUBO {
 	glm::mat4 *model = nullptr;
 	static size_t DU_Alignment;
 	std::vector<Transform*> inversePtr;
-	//size_t lastIndex = 0;
 
 	glm::mat4* GetAvailableModel(Transform* pTr)
 	{
 		glm::mat4* m = (glm::mat4*)(((uint64_t)model + (inversePtr.size() * DU_Alignment)));
 		inversePtr.push_back(pTr);
-		//inversePtr[m] = pTr;
-		//lastIndex++;
 		return m;
 	}
 
@@ -67,12 +64,8 @@ struct DynamicUBO {
 			*m = *lastModel;
 			inversePtr.back()->transMatrix = m;
 			inversePtr[index] = inversePtr.back();
-			//inversePtr[m] = inversePtr[lastModel];
-			//inversePtr.erase(lastModel);
 		}
 		inversePtr.resize(inversePtr.size() - 1);
-		//*lastModel = glm::mat4(1.0f);
-		//lastIndex--;
 	}
 };
 

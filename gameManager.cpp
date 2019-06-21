@@ -52,6 +52,8 @@ void GameManager::mainLoop()
 					20 * cosf(glm::radians(360.0f / pComponentManager->activeComponents[TRANSFORM].size()*ti + t)),
 					20 * sinf(glm::radians(360.0f / pComponentManager->activeComponents[TRANSFORM].size()*ti + t)),
 					0);
+				pComponentManager->mTransforms[i].localRotation *= 
+					glm::quat(glm::radians(glm::vec3(0.0f, pFRC->GetFrameTime()*60.0f, 0.0f)));
 				pComponentManager->mTransforms[i].dirty = true;
 				ti++;
 			}

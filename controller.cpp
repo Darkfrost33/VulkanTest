@@ -49,8 +49,8 @@ void Controller::Update(float deltaTime)
 	}
 	glm::vec2 mouseMove = Input_Manager::GetInstance()->GetMouseMovedRight();
 	//std::cout << mouseMove.x << ", " << mouseMove.y << std::endl;
-	mTrans->localRotation = mTrans->localRotation 
-		* glm::quat(glm::radians(glm::vec3(mouseMove.y*viewSpeedY*deltaTime, mouseMove.x*viewSpeedX*deltaTime, 0.0f)));
+	mTrans->localRotation *= 
+		glm::quat(glm::radians(glm::vec3(mouseMove.y*viewSpeedY*deltaTime, mouseMove.x*viewSpeedX*deltaTime, 0.0f)));
 	mTrans->dirty = true;
 
 	if (Input_Manager::GetInstance()->IsTriggered(VK_P))

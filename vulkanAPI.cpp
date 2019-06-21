@@ -778,7 +778,6 @@ void VulkanAPI::updateUniformBuffer(uint32_t currentImage)
 void VulkanAPI::updateDynamicUniformBuffer(uint32_t currentImage)
 {
 	uint32_t index = 0;
-
 	for (auto &dynamicUBO : uboDynamic)
 	{
 		void* data = reinterpret_cast<size_t*>(dynamicUniformData[currentImage]) + normalUBOAlignment / sizeof(size_t) + index* (LONG_SIZE * dynamicAlignment / sizeof(size_t));
@@ -1823,9 +1822,6 @@ void VulkanAPI::createCommandBuffers()
 			vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &vertexIndexBuffers[k], offsets);
 			vkCmdBindVertexBuffers(commandBuffers[i], 1, 1, &instanceBuffer, offsets);
 			vkCmdBindIndexBuffer(commandBuffers[i], vertexIndexBuffers[k], sizeof((*dubo.first).vertices[0])*(*dubo.first).vertices.size(), VK_INDEX_TYPE_UINT32);
-
-			//vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[i], 0, nullptr);
-			//vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(indices.size()), INSTANCE_COUNT, 0, 0, 0);
 
 			for (uint32_t j = 0; j < dubo.second.inversePtr.size(); ++j)
 			{
