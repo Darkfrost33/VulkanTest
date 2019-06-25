@@ -1,9 +1,19 @@
 #pragma once
 #include "Singleton.h"
 #include "componentManager.h"
+#include "imGui/imgui.h"
 struct QueueFamilyIndices;
 struct SwapChainSupportDetails;
 class Transform;
+class ImGUI;
+#define VK_CHECK_RESULT(f)																				\
+{																										\
+	VkResult res = (f);																					\
+	if (res != VK_SUCCESS)																				\
+	{																									\
+		throw std::runtime_error("vk failed !");														\
+	}																									\
+}
 
 const size_t TEXTURE_COUNT = 3;
 
@@ -84,10 +94,14 @@ class VulkanAPI:public Singleton<VulkanAPI>
 public:
 	void initWindow();
 	void initVulkan();
-	void draw();
+	void draw(float deltaTime);
 	void cleanup();
 
 	uint32_t UploadTexture(std::string path);
+
+	VkDevice device;
+
+	ImGUI *imGui = nullptr;
 
 	GLFWwindow* pWindow;
 	glm::mat4* cameraTransform = nullptr;
@@ -95,15 +109,15 @@ public:
 	void flushCommandBuffer();
 
 	std::unordered_map<MeshData*, DynamicUBO> uboDynamic;
-private:
-	friend class Singleton< VulkanAPI>;
-	VulkanAPI(){}
+	float frameTimer;
+	float frameCounter = 0.0f;
+
 	VkInstance instance;
 	VkDebugUtilsMessengerEXT debugMessenger;
 	VkSurfaceKHR surface;
 
 	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-	VkDevice device;
+	
 	VkQueue graphicsQueue;
 	VkQueue presentQueue;
 	VkSwapchainKHR swapChain;
@@ -121,8 +135,6 @@ private:
 	VkDeviceMemory instanceBufferMemory;
 	std::vector<VkBuffer> uniformBuffers;
 	std::vector<VkDeviceMemory> uniformBuffersMemory;
-	//std::vector<VkBuffer> dynamicUniformBuffers;
-	//std::vector<VkDeviceMemory> dynamicUniformBuffersMemory;
 	std::vector<void*> dynamicUniformData;
 
 	size_t dynamicAlignment;
@@ -143,10 +155,10 @@ private:
 	std::vector<VkDescriptorSet> descriptorSets;
 	//VkDescriptorSet textureDescriptorSets;
 
-	std::vector<VkSemaphore> imageAvailableSemaphores;
-	std::vector<VkSemaphore> renderFinishedSemaphores;
-	std::vector<VkFence> inFlightFences;
-	size_t currentFrame = 0;
+	VkSemaphore imageAvailableSemaphores;
+	VkSemaphore renderFinishedSemaphores;
+	//std::vector<VkFence> inFlightFences;
+	//size_t currentFrame = 0;
 
 	//std::vector<Vertex> vertices;
 	//std::vector<uint32_t> indices;
@@ -172,6 +184,7 @@ private:
 
 	bool frameBufferResized = false;
 
+	void prepareImGui();
 	void createInstance();
 	void setupDebugMessenger();
 	void createSurface();
@@ -186,8 +199,6 @@ private:
 	void createColorResource();
 	void createDepthResource();
 	void createFramebuffers();
-	//void createTextureImage();
-	//void createTextureImageView();
 	VkSampler* createTextureSampler(uint32_t mipLevels);
 	void createPushConstants();
 	void createVertexIndexBuffer();
@@ -198,6 +209,7 @@ private:
 	void createTextureDescriptorPool();
 	void createDescriptorSet();
 	void createCommandBuffers();
+	void UpdateCommandBuffers();
 	void createSyncObjects();
 	void recreateSwapChain();
 	void cleanupSwapChain();
@@ -239,4 +251,98 @@ private:
 		VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+
+private:
+	friend class Singleton< VulkanAPI>;
+	VulkanAPI() {}
+};
+
+struct UISettings {
+	bool displayModels = true;
+	bool displayLogos = true;
+	bool displayBackground = true;
+	bool animateLight = false;
+	float lightSpeed = 0.25f;
+	std::array<float, 50> frameTimes{};
+	float frameTimeMin = 9999.0f, frameTimeMax = 0.0f;
+	float lightTimer = 0.0f;
+};
+
+// ----------------------------------------------------------------------------
+// ImGUI class
+// ----------------------------------------------------------------------------
+class ImGUI {
+private:
+	// Vulkan resources for rendering the UI
+	VkSampler sampler;
+	VkBuffer vertexBuffer = VK_NULL_HANDLE;
+	VkDeviceMemory vertexBufferMemory = VK_NULL_HANDLE;
+	void* vertexMap = nullptr;
+	VkBuffer indexBuffer = VK_NULL_HANDLE;
+	VkDeviceMemory indexBufferMemory = VK_NULL_HANDLE;
+	void* indexMap = nullptr;
+	int32_t vertexCount = 0;
+	int32_t indexCount = 0;
+	VkDeviceMemory fontMemory = VK_NULL_HANDLE;
+	VkImage fontImage = VK_NULL_HANDLE;
+	VkImageView fontView = VK_NULL_HANDLE;
+	VkPipelineCache pipelineCache;
+	VkPipelineLayout pipelineLayout;
+	VkPipeline pipeline;
+	VkRenderPass renderPass;
+	VkDescriptorPool descriptorPool;
+	VkDescriptorSetLayout descriptorSetLayout;
+	VkDescriptorSet descriptorSet;
+	VulkanAPI *mainVulkan;
+	UISettings uiSettings;
+	float frameTime = 0.0f;
+public:
+	// UI params are set via push constants
+	struct PushConstBlock {
+		glm::vec2 scale;
+		glm::vec2 translate;
+	} pushConstBlock;
+
+	ImGUI(VulkanAPI *vk) : mainVulkan(vk)
+	{
+		ImGui::CreateContext();
+	};
+
+	~ImGUI();
+
+	void init(float width, float height);
+	void createRenderPass();
+	void createPipeine();
+	void initResources();
+	void newFrame(VulkanAPI *vk, bool updateFrameGraph);
+	void updateBuffers();
+	void drawFrame(VkCommandBuffer commandBuffer);
+
+	void CreateCommandBuffers();
+	void UpdateCommandBuffers(VkFramebuffer framBuffer);
+	VkCommandBuffer commandBuffers;
+private:
+	// Put an image memory barrier for setting an image layout on the sub resource into the given command buffer
+	void setImageLayout(
+		VkCommandBuffer cmdbuffer,
+		VkImage image,
+		VkImageLayout oldImageLayout,
+		VkImageLayout newImageLayout,
+		VkImageSubresourceRange subresourceRange,
+		VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+		VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+	// Uses a fixed sub resource layout with first mip level and layer
+	void setImageLayout(
+		VkCommandBuffer cmdbuffer,
+		VkImage image,
+		VkImageAspectFlags aspectMask,
+		VkImageLayout oldImageLayout,
+		VkImageLayout newImageLayout,
+		VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+		VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+	VkVertexInputAttributeDescription vertexInputAttributeDescription(
+		uint32_t binding,
+		uint32_t location,
+		VkFormat format,
+		uint32_t offset);
 };

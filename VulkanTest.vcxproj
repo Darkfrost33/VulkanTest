@@ -165,6 +165,10 @@
     <ClCompile Include="controller.cpp" />
     <ClCompile Include="Frame Rate Controller.cpp" />
     <ClCompile Include="gameManager.cpp" />
+    <ClCompile Include="imGui\imgui.cpp" />
+    <ClCompile Include="imGui\imgui_demo.cpp" />
+    <ClCompile Include="imGui\imgui_draw.cpp" />
+    <ClCompile Include="imGui\imgui_widgets.cpp" />
     <ClCompile Include="Input Manager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mesh.cpp" />
@@ -186,6 +190,12 @@
     <ClInclude Include="entity.h" />
     <ClInclude Include="Frame Rate Controller.h" />
     <ClInclude Include="gameManager.h" />
+    <ClInclude Include="imGui\imconfig.h" />
+    <ClInclude Include="imGui\imgui.h" />
+    <ClInclude Include="imGui\imgui_internal.h" />
+    <ClInclude Include="imGui\imstb_rectpack.h" />
+    <ClInclude Include="imGui\imstb_textedit.h" />
+    <ClInclude Include="imGui\imstb_truetype.h" />
     <ClInclude Include="Input Manager.h" />
     <ClInclude Include="KeyName.h" />
     <ClInclude Include="Mesh.h" />

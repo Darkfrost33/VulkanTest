@@ -79,6 +79,7 @@ void Input_Manager::mouse_button_callback(GLFWwindow* window, int button, int ac
 	{
 		case GLFW_MOUSE_BUTTON_LEFT:
 			//printf("Mosue left button clicked!\n");
+			Input_Manager::GetInstance()->leftClick = true;
 			break;
 		case GLFW_MOUSE_BUTTON_MIDDLE:
 			//printf("Mosue middle button clicked!\n");
@@ -94,6 +95,7 @@ void Input_Manager::mouse_button_callback(GLFWwindow* window, int button, int ac
 	{
 		case GLFW_MOUSE_BUTTON_LEFT:
 			//printf("Mosue left button released!\n");
+			Input_Manager::GetInstance()->leftClick = false;
 			break;
 		case GLFW_MOUSE_BUTTON_MIDDLE:
 			//printf("Mosue middle button released!\n");

@@ -40,8 +40,9 @@ void GameManager::initiate()
 void GameManager::mainLoop()
 {
 	while (!glfwWindowShouldClose(pGraphics->pWindow)) {
-		t += pFRC->GetFrameTime()*10;
 		pFRC->FrameStart();
+		float deltaT = pFRC->GetFrameTime();
+		t += deltaT*10.0f;
 		pInputManager->Update();
 		glfwPollEvents();
 		size_t ti = 0;
@@ -53,14 +54,14 @@ void GameManager::mainLoop()
 					20 * sinf(glm::radians(360.0f / pComponentManager->activeComponents[TRANSFORM].size()*ti + t)),
 					0);
 				pComponentManager->mTransforms[i].localRotation *= 
-					glm::quat(glm::radians(glm::vec3(0.0f, pFRC->GetFrameTime()*60.0f, 0.0f)));
+					glm::quat(glm::radians(glm::vec3(0.0f, deltaT*60.0f, 0.0f)));
 				pComponentManager->mTransforms[i].dirty = true;
 				ti++;
 			}
 		}
-		pComponentManager->Update(pFRC->GetFrameTime());
+		pComponentManager->Update(deltaT);
 
-		pGraphics->draw();
+		pGraphics->draw(deltaT);
 		pComponentManager->Delete();
 		pComponentManager->registerNewComponents();
 		pFRC->FrameEnd();

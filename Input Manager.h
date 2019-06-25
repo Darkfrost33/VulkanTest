@@ -29,13 +29,14 @@ public:
 
 	static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 	static void mouse_move_callback(GLFWwindow* window, double x, double y);
+	double X, Y;
+	bool leftClick, rightClick;
 private:
 	friend class Singleton<Input_Manager>;
 	Input_Manager();
 	uint8_t mCurrentState[256];
 	uint8_t mPreviousState[256];
-	bool rightClick;
-	double prevX, prevY, X, Y;
+	double prevX, prevY;
 };
 
 

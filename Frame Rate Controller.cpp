@@ -16,10 +16,10 @@ History:
 
 FrameRateController::FrameRateController(uint32_t MaxFramerate)
 {
-	mTickStart = mTickEnd = mFrameTime = 0;
+	mFrameTime = 0;
 
 	if (0 != MaxFramerate)
-		mNeededTicksPerFrame = 1000 / MaxFramerate;
+		mNeededTicksPerFrame = 1.0f / MaxFramerate;
 	else
 		mNeededTicksPerFrame = 0;
 }
@@ -31,31 +31,32 @@ FrameRateController:: ~FrameRateController()
 
 void FrameRateController::FrameStart()
 {
-	mTickStart = clock();
+	mTickStart = std::chrono::high_resolution_clock::now();
 }
 
 void FrameRateController::FrameEnd()
 {
-	mTickEnd = clock();
-	while (mTickEnd - mTickStart < mNeededTicksPerFrame)
+	mTickEnd = std::chrono::high_resolution_clock::now();
+	float time = std::chrono::duration<float, std::chrono::seconds::period>(mTickEnd - mTickStart).count();
+	while (time < mNeededTicksPerFrame)
 	{
-		mTickEnd = clock();
+		mTickEnd = std::chrono::high_resolution_clock::now();
 	}
-	mFrameTime = mTickEnd - mTickStart;
+	mFrameTime = time;
 }
 
 float FrameRateController::GetFrameTime()
 {
-	return mFrameTime*0.001f;
+	return mFrameTime;
 }
 
 void FrameRateController::SetMaxFrameRate(uint32_t MaxFramerate) {
 	if (0 != MaxFramerate)
-		mNeededTicksPerFrame = 1000 / MaxFramerate;
+		mNeededTicksPerFrame = 1.0f / MaxFramerate;
 	else
 		mNeededTicksPerFrame = 0;
 }
 
 uint32_t FrameRateController::GetMaxFrameRate() {
-	return mNeededTicksPerFrame * 1000;
+	return 1.0f/mNeededTicksPerFrame;
 }

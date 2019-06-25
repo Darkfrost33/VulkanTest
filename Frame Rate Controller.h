@@ -28,9 +28,9 @@ public:
 	void SetMaxFrameRate(uint32_t MaxFramerate);
 	uint32_t GetMaxFrameRate();
 private:
-	time_t mTickStart, mTickEnd;
+	std::chrono::time_point<std::chrono::high_resolution_clock> mTickStart, mTickEnd;
 	float mFrameTime;
-	uint32_t mNeededTicksPerFrame;
+	float mNeededTicksPerFrame;
 };
 
 #endif
