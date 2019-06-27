@@ -4,7 +4,6 @@
 #include "imGui/imgui.h"
 struct QueueFamilyIndices;
 struct SwapChainSupportDetails;
-class Transform;
 class ImGUI;
 #define VK_CHECK_RESULT(f)																				\
 {																										\
@@ -36,6 +35,7 @@ struct VertexData {
 
 struct MeshData
 {
+	std::string name;
 	std::vector<VertexData> vertices;
 	std::vector<uint32_t> indices;
 	//Material *mat;
@@ -79,6 +79,34 @@ struct DynamicUBO {
 	}
 };
 
+struct DynamicColliderUBO {
+	glm::mat4 *model = nullptr;
+	static size_t DU_Alignment;
+	std::vector<Collider*> inversePtr;
+	uint32_t vertexID;
+	MeshData* mMesh;
+
+	glm::mat4* GetAvailableModel(Collider* pTr)
+	{
+		glm::mat4* m = (glm::mat4*)(((uint64_t)model + (inversePtr.size() * DU_Alignment)));
+		inversePtr.push_back(pTr);
+		return m;
+	}
+
+	void DeleteModel(glm::mat4* m)
+	{
+		glm::mat4* lastModel = (glm::mat4*)(((uint64_t)model + ((inversePtr.size() - 1) * DU_Alignment)));
+		size_t index = ((uint64_t)m - (uint64_t)model) / DU_Alignment;
+
+		if (m != lastModel) {
+			*m = *lastModel;
+			inversePtr.back()->colliderMatrix = m;
+			inversePtr[index] = inversePtr.back();
+		}
+		inversePtr.resize(inversePtr.size() - 1);
+	}
+};
+
 struct TextureInfo
 {
 	VkImage textureImage;
@@ -109,6 +137,7 @@ public:
 	void flushCommandBuffer();
 
 	std::unordered_map<MeshData*, DynamicUBO> uboDynamic;
+	std::map<COLLIDER_TYPE, DynamicColliderUBO> uboCollider;
 	float frameTimer;
 	float frameCounter = 0.0f;
 
@@ -135,7 +164,10 @@ public:
 	VkDeviceMemory instanceBufferMemory;
 	std::vector<VkBuffer> uniformBuffers;
 	std::vector<VkDeviceMemory> uniformBuffersMemory;
+	std::vector<VkBuffer> colliderUniformBuffers;
+	std::vector<VkDeviceMemory> colliderUniformBuffersMemory;
 	std::vector<void*> dynamicUniformData;
+	std::vector<void*> colliderUniformData;
 
 	size_t dynamicAlignment;
 	size_t normalUBOAlignment;
@@ -144,6 +176,7 @@ public:
 	VkRenderPass renderPass;
 	VkPipelineLayout pipelineLayout;
 	VkPipeline graphicsPipeline;
+	VkPipeline debugLinePipeline;
 
 	VkCommandPool commandPool;
 	std::vector<VkCommandBuffer> commandBuffers;
@@ -153,6 +186,7 @@ public:
 	VkDescriptorPool descriptorPool;
 	VkDescriptorPool textureDescriptorPool;
 	std::vector<VkDescriptorSet> descriptorSets;
+	std::vector<VkDescriptorSet> debugLinedescriptorSets;
 	//VkDescriptorSet textureDescriptorSets;
 
 	VkSemaphore imageAvailableSemaphores;
@@ -215,7 +249,6 @@ public:
 	void cleanupSwapChain();
 
 	void createInstanceData();
-	void updateDynamicUniformBuffer(uint32_t currentImage);
 	void updateUniformBuffer(uint32_t currentImage);
 	void drawFrame();
 
@@ -251,6 +284,30 @@ public:
 		VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
 	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+
+	// Put an image memory barrier for setting an image layout on the sub resource into the given command buffer
+	void setImageLayout(
+		VkCommandBuffer cmdbuffer,
+		VkImage image,
+		VkImageLayout oldImageLayout,
+		VkImageLayout newImageLayout,
+		VkImageSubresourceRange subresourceRange,
+		VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+		VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+	// Uses a fixed sub resource layout with first mip level and layer
+	void setImageLayout(
+		VkCommandBuffer cmdbuffer,
+		VkImage image,
+		VkImageAspectFlags aspectMask,
+		VkImageLayout oldImageLayout,
+		VkImageLayout newImageLayout,
+		VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+		VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
+	VkVertexInputAttributeDescription vertexInputAttributeDescription(
+		uint32_t binding,
+		uint32_t location,
+		VkFormat format,
+		uint32_t offset);
 
 private:
 	friend class Singleton< VulkanAPI>;
@@ -321,28 +378,4 @@ public:
 	void CreateCommandBuffers();
 	void UpdateCommandBuffers(VkFramebuffer framBuffer);
 	VkCommandBuffer commandBuffers;
-private:
-	// Put an image memory barrier for setting an image layout on the sub resource into the given command buffer
-	void setImageLayout(
-		VkCommandBuffer cmdbuffer,
-		VkImage image,
-		VkImageLayout oldImageLayout,
-		VkImageLayout newImageLayout,
-		VkImageSubresourceRange subresourceRange,
-		VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-		VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
-	// Uses a fixed sub resource layout with first mip level and layer
-	void setImageLayout(
-		VkCommandBuffer cmdbuffer,
-		VkImage image,
-		VkImageAspectFlags aspectMask,
-		VkImageLayout oldImageLayout,
-		VkImageLayout newImageLayout,
-		VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
-		VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_ALL_COMMANDS_BIT);
-	VkVertexInputAttributeDescription vertexInputAttributeDescription(
-		uint32_t binding,
-		uint32_t location,
-		VkFormat format,
-		uint32_t offset);
 };

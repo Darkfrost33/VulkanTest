@@ -65,7 +65,12 @@ void Controller::Update(float deltaTime)
 		ComponentManager::GetInstance()->mTransforms[newComponent].GetTextureID("Textures/texture.jpg");
 		newComponent = ComponentManager::GetInstance()->newComponent(newGameObjectID, MESH);
 		ComponentManager::GetInstance()->mMeshes[newComponent].BindMesh("box");
-
+		newComponent = ComponentManager::GetInstance()->newComponent(newGameObjectID, BODY);
+		newComponent = ComponentManager::GetInstance()->newComponent(newGameObjectID, COLLIDER);
+		ComponentManager::GetInstance()->mColliders[newComponent].type = BOX;
+		ComponentManager::GetInstance()->mColliders[newComponent].length = 1.0f;
+		ComponentManager::GetInstance()->mColliders[newComponent].width = 1.0f;
+		ComponentManager::GetInstance()->mColliders[newComponent].height = 1.0f;
 		ComponentManager::GetInstance()->StartComponents(newGameObjectID);
 	}
 	if (Input_Manager::GetInstance()->IsTriggered(VK_O))
@@ -80,7 +85,10 @@ void Controller::Update(float deltaTime)
 		ComponentManager::GetInstance()->mTransforms[newComponent].GetTextureID("Textures/2k_earth.jpg");
 		newComponent = ComponentManager::GetInstance()->newComponent(newGameObjectID, MESH);
 		ComponentManager::GetInstance()->mMeshes[newComponent].BindMesh("sphere");
-
+		newComponent = ComponentManager::GetInstance()->newComponent(newGameObjectID, BODY);
+		newComponent = ComponentManager::GetInstance()->newComponent(newGameObjectID, COLLIDER);
+		ComponentManager::GetInstance()->mColliders[newComponent].type = SPHERE;
+		ComponentManager::GetInstance()->mColliders[newComponent].radius = 1.0f;
 		ComponentManager::GetInstance()->StartComponents(newGameObjectID);
 	}
 
@@ -118,5 +126,6 @@ void Controller::Serialize(XMLElement * _element)
 
 void Controller::Initialize()
 {
+	Component::Initialize();
 	mTrans = nullptr;
 }

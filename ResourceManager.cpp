@@ -44,7 +44,7 @@ void ResourceManager::Initialize_Models()
 {
 	mMeshes["box"] = BoxMesh();
 	mMeshes["sphere"] = SphereMesh();
-	mMeshes["house"] = LoadModel("house", "Models/chalet.obj");
+	//mMeshes["house"] = LoadModel("house", "Models/chalet.obj");
 }
 
 void ResourceManager::Initialize_Textures()
@@ -65,6 +65,7 @@ MeshData * ResourceManager::LoadModel(std::string name, std::string path)
 	std::vector<tinyobj::material_t> materials;
 	std::string warn, err;
 	MeshData* meshdata = new MeshData();
+	meshdata->name = name;
 	if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.c_str())) {
 		throw std::runtime_error(warn + err);
 	}
@@ -136,6 +137,7 @@ MeshData* ResourceManager::BoxMesh()
 
 	glm::mat4 half = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f, 0.5f, 0.5f));
 	MeshData* meshdata = new MeshData();
+	meshdata->name = "box";
 	for (unsigned int f = 0; f < 6; f++) {
 		glm::mat4 m4 = face[f]*half;
 		for (unsigned int i = 0; i < 2; i++) {
@@ -166,6 +168,7 @@ MeshData * ResourceManager::SphereMesh()
 	}
 
 	MeshData* meshdata = new MeshData();
+	meshdata->name = "sphere";
 	unsigned int n = 20;
 	float PI = glm::pi<float>();
 	for (unsigned int i = 0; i <= n * 2; i++) {

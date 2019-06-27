@@ -6,16 +6,19 @@
 #include "controller.h"
 #include "camera.h"
 #include "Mesh.h"
+#include "Collider.h"
+
 #define LONG_SIZE 2048
 #define MED_SIZE 512
 #define SHORT_SIZE 32
-
+class CollisionManager;
 const std::array<uint32_t, COMPONENT_NUM> componentSize = {
 	LONG_SIZE,
 	LONG_SIZE,
 	LONG_SIZE,
 	SHORT_SIZE,
 	SHORT_SIZE,
+	LONG_SIZE,
 	LONG_SIZE
 };
 
@@ -30,6 +33,7 @@ public:
 	std::array<Controller, SHORT_SIZE> mControllers;
 	std::array<Camera, SHORT_SIZE> mCameras;
 	std::array<Mesh, LONG_SIZE> mMeshes;
+	std::array<Collider, LONG_SIZE> mColliders;
 
 	std::array<std::set<uint32_t>, COMPONENT_NUM> activeComponents;
 
@@ -40,6 +44,8 @@ public:
 	void Update(float deltaTime);
 	void Delete();
 	void registerNewComponents();
+
+	CollisionManager* pCoManager;
 private:
 	friend class Singleton< ComponentManager>;
 	ComponentManager();
@@ -52,4 +58,30 @@ private:
 	std::vector<std::vector<Component*>> componentsAddress;
 	bool addingGameObject;
 	bool deletingGameObject;
+};
+
+class Contact
+{
+public:
+	Contact() {
+		mpColliders[0] = nullptr;
+		mpColliders[1] = nullptr;
+	}
+	Collider* mpColliders[2];
+};
+
+class CollisionManager
+{
+public:
+	CollisionManager();
+	~CollisionManager();
+
+	void Reset();
+	// generate to push into the contacts
+	bool CheckConllisionAndGenerateContact(Collider *pCo1, Collider *pCo2);
+
+	std::list<Contact*> mContacts;
+private:
+	// 2D array of function pointer, used to store the collision functions' address
+	bool(*CollisionFunctions[COLLIDER_TYPE::COLLIDER_TYPE_NUM][COLLIDER_TYPE::COLLIDER_TYPE_NUM])(Collider *pCo1, Collider *pCo2, std::list<Contact*> &Contacts);
 };

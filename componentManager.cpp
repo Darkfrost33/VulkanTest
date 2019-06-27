@@ -46,12 +46,21 @@ ComponentManager::ComponentManager()
 	componentsAddress.push_back(temp);
 	temp.clear();
 
+	for (auto& t : mColliders)
+	{
+		temp.push_back(&t);
+	}
+	componentsAddress.push_back(temp);
+	temp.clear();
+
 	addingGameObject = deletingGameObject = false;
+
+	pCoManager = new CollisionManager();
 }
 
 ComponentManager::~ComponentManager()
 {
-
+	delete pCoManager;
 }
 
 uint32_t ComponentManager::newComponent(uint32_t type)
@@ -150,6 +159,26 @@ void ComponentManager::Update(float deltaTime)
 		mTransforms[cp].Update(deltaTime);
 	}
 	// update collision
+	for (auto cp : activeComponents[COLLIDER]) {
+		mColliders[cp].Update(deltaTime);
+	}
+	// Reset previous contacts
+	pCoManager->Reset();
+	// Check for intersections
+	auto pObj1 = activeComponents[COLLIDER].begin();
+	auto pObjLast = activeComponents[COLLIDER].end();
+	for (; pObj1 != pObjLast; ++pObj1) {
+		Collider* pCollider1 = &mColliders[(*pObj1)];
+		auto pObj2 = pObj1;
+		pObj2++;
+		for (; pObj2 != pObjLast; ++pObj2)
+		{
+			Collider* pCollider2 = &mColliders[(*pObj2)];
+			pCoManager->CheckConllisionAndGenerateContact(pCollider1, pCollider2);
+		}
+	}
+
+
 
 	// resolve collision
 }
@@ -198,4 +227,60 @@ void ComponentManager::registerNewComponents()
 		VulkanAPI::GetInstance()->flushCommandBuffer();
 		addingGameObject = false;
 	}
+}
+
+
+bool CheckCollisionSphereSphere(Collider * pCo1, Collider * pCo2, std::list<Contact*> &Contacts)
+{
+	if (glm::distance2(pCo1->center, pCo2->center) < glm::length2(pCo1->radius + pCo1->radius))
+	{
+		printf("Circle to Circle\n");
+		//Create a new contact and add it
+		Contact* pNewContact = new Contact();
+		pNewContact->mpColliders[0] = pCo1;
+		pNewContact->mpColliders[1] = pCo2;
+		Contacts.push_back(pNewContact);
+		return true;
+	}
+	return false;
+}
+
+bool CheckCollisionSphereBox(Collider * pCo1, Collider * pCo2, std::list<Contact*> &Contacts)
+{
+	return false;
+}
+bool CheckCollisionBoxSphere(Collider * pCo1, Collider * pCo2, std::list<Contact*> &Contacts)
+{
+	return false;
+}
+bool CheckCollisionBoxBox(Collider * pCo1, Collider * pCo2, std::list<Contact*> &Contacts)
+{
+	return false;
+}
+
+
+CollisionManager::CollisionManager()
+{
+	CollisionFunctions[COLLIDER_TYPE::SPHERE][COLLIDER_TYPE::SPHERE] = CheckCollisionSphereSphere;
+	CollisionFunctions[COLLIDER_TYPE::SPHERE][COLLIDER_TYPE::BOX] = CheckCollisionSphereBox;
+	CollisionFunctions[COLLIDER_TYPE::BOX][COLLIDER_TYPE::SPHERE] = CheckCollisionBoxSphere;
+	CollisionFunctions[COLLIDER_TYPE::BOX][COLLIDER_TYPE::BOX] = CheckCollisionBoxBox;
+	mContacts.clear();
+}
+
+CollisionManager::~CollisionManager()
+{
+	Reset();
+}
+
+void CollisionManager::Reset()
+{
+	for (auto c : mContacts)
+		delete c;
+	mContacts.clear();
+}
+
+bool CollisionManager::CheckConllisionAndGenerateContact(Collider * pCo1, Collider * pCo2)
+{
+	return CollisionFunctions[pCo1->type][pCo2->type](pCo1, pCo2, mContacts);
 }

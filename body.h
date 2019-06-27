@@ -1,6 +1,6 @@
 #pragma once
 #include "component.h"
-
+class Transform;
 class Body :public Component
 {
 public:
@@ -13,5 +13,5 @@ public:
 	glm::vec3 force, acc, vel;
 	float mass, invMass;
 
-	uint32_t mTrans;
+	Transform* mTrans;
 };

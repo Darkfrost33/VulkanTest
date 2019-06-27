@@ -161,6 +161,7 @@
   <ItemGroup>
     <ClCompile Include="body.cpp" />
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="Collider.cpp" />
     <ClCompile Include="componentManager.cpp" />
     <ClCompile Include="controller.cpp" />
     <ClCompile Include="Frame Rate Controller.cpp" />
@@ -184,6 +185,7 @@
   <ItemGroup>
     <ClInclude Include="body.h" />
     <ClInclude Include="camera.h" />
+    <ClInclude Include="Collider.h" />
     <ClInclude Include="component.h" />
     <ClInclude Include="componentManager.h" />
     <ClInclude Include="controller.h" />

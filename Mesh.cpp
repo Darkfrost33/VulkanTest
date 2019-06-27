@@ -24,6 +24,7 @@ void Mesh::Serialize(XMLElement * _element)
 
 void Mesh::Initialize()
 {
+	Component::Initialize();
 }
 
 void Mesh::BindMesh(std::string name)

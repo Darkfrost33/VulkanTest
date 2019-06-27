@@ -91,4 +91,31 @@ void GameManager::CreateGameObjects()
 
 	//	pComponentManager->StartComponents(newGameObjectID);
 	//}
+	{
+		uint32_t newGameObjectID = pComponentManager->newComponent(ENTITY);
+		uint32_t newComponent = pComponentManager->newComponent(newGameObjectID, TRANSFORM);
+		pComponentManager->mTransforms[newComponent].GetTextureID("Textures/2k_earth.jpg");
+		//newComponent = pComponentManager->newComponent(newGameObjectID, CONTROLLER);
+		newComponent = pComponentManager->newComponent(newGameObjectID, MESH);
+		pComponentManager->mMeshes[newComponent].BindMesh("sphere");
+		newComponent = pComponentManager->newComponent(newGameObjectID, BODY);
+		newComponent = pComponentManager->newComponent(newGameObjectID, COLLIDER);
+		pComponentManager->mColliders[newComponent].type = SPHERE;
+		pComponentManager->mColliders[newComponent].radius = 1.0f;
+		pComponentManager->StartComponents(newGameObjectID);
+	}
+
+	{
+		uint32_t newGameObjectID = pComponentManager->newComponent(ENTITY);
+		uint32_t newComponent = pComponentManager->newComponent(newGameObjectID, TRANSFORM);
+		pComponentManager->mTransforms[newComponent].GetTextureID("Textures/2k_earth.jpg");
+		pComponentManager->mTransforms[newComponent].localPosition = glm::vec3(5.f,0.f,0.f);
+		newComponent = pComponentManager->newComponent(newGameObjectID, MESH);
+		pComponentManager->mMeshes[newComponent].BindMesh("sphere");
+		newComponent = pComponentManager->newComponent(newGameObjectID, BODY);
+		newComponent = pComponentManager->newComponent(newGameObjectID, COLLIDER);
+		pComponentManager->mColliders[newComponent].type = SPHERE;
+		pComponentManager->mColliders[newComponent].radius = 0.5f;
+		pComponentManager->StartComponents(newGameObjectID);
+	}
 }
