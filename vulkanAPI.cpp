@@ -278,6 +278,7 @@ void VulkanAPI::cleanupSwapChain()
 
 	vkDestroyPipeline(device, graphicsPipeline, nullptr);
 	vkDestroyPipeline(device, debugLinePipeline, nullptr);
+	vkDestroyPipeline(device, debugPointPipeline, nullptr);
 	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
 	vkDestroyRenderPass(device, renderPass, nullptr);
 
@@ -295,6 +296,9 @@ void VulkanAPI::cleanupSwapChain()
 		vkUnmapMemory(device, colliderUniformBuffersMemory[i]);
 		vkDestroyBuffer(device, colliderUniformBuffers[i], nullptr);
 		vkFreeMemory(device, colliderUniformBuffersMemory[i], nullptr);
+		vkUnmapMemory(device, pointUniformBufferMemory[i]);
+		vkDestroyBuffer(device, pointUniformBuffer[i], nullptr);
+		vkFreeMemory(device, pointUniformBufferMemory[i], nullptr);
 	}
 
 	vkDestroyDescriptorPool(device, descriptorPool, nullptr);
@@ -317,6 +321,7 @@ void VulkanAPI::cleanup()
 			alignedFree(ud.second.model);
 		}
 	}
+	alignedFree(pointTransforms);
 
 	for (auto &sap : textureSamplers)
 	{
@@ -340,6 +345,8 @@ void VulkanAPI::cleanup()
 		vkDestroyBuffer(device, vertexIndexBuffers[i], nullptr);
 		vkFreeMemory(device, vertexIndexBufferMemorys[i], nullptr);
 	}
+	//vkDestroyBuffer(device, pointBuffer, nullptr);
+	//vkFreeMemory(device, pointBufferMemory, nullptr);
 
 	vkDestroySemaphore(device, renderFinishedSemaphores, nullptr);
 	vkDestroySemaphore(device, imageAvailableSemaphores, nullptr);
@@ -506,6 +513,28 @@ void VulkanAPI::createVertexIndexBuffer()
 		vkFreeMemory(device, stagingBufferMemory, nullptr);
 		++i;
 	}
+
+	// point
+	//VertexData zeroPoint;
+	//zeroPoint.pos = glm::vec3(0.0f, 0.0f, 0.0f);
+	//VkDeviceSize vertexBufferSize = sizeof(VertexData);;
+
+	//VkBuffer stagingBuffer;
+	//VkDeviceMemory stagingBufferMemory;
+	//createBuffer(vertexBufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+	//	VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+	//void* vertexData;
+	//vkMapMemory(device, stagingBufferMemory, 0, vertexBufferSize, 0, &vertexData);
+	//memcpy(vertexData, &zeroPoint, (size_t)vertexBufferSize);
+	//vkUnmapMemory(device, stagingBufferMemory);
+
+	//createBuffer(vertexBufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT |
+	//	VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, pointBuffer, pointBufferMemory);
+	//copyBuffer(stagingBuffer, pointBuffer, vertexBufferSize);
+
+	//vkDestroyBuffer(device, stagingBuffer, nullptr);
+	//vkFreeMemory(device, stagingBufferMemory, nullptr);
 }
 
 void VulkanAPI::createInstanceBuffer()
@@ -553,6 +582,7 @@ void VulkanAPI::createDynamicModels()
 			uboCollider[SPHERE].model = (glm::mat4*)alignedAlloc(bufferSize, dynamicAlignment);
 		}
 	}
+	pointTransforms = (glm::mat4*)alignedAlloc(bufferSize, dynamicAlignment);
 }
 
 void VulkanAPI::createUniformBuffers()
@@ -564,8 +594,11 @@ void VulkanAPI::createUniformBuffers()
 	//dynamic
 	VkDeviceSize bufferSize = LONG_SIZE * dynamicAlignment * uboDynamic.size();
 	VkDeviceSize colliderBufferSize = LONG_SIZE * dynamicAlignment * uboCollider.size();
+	VkDeviceSize pointBufferSize = LONG_SIZE * dynamicAlignment;
+
 	dynamicUniformData.resize(swapChainImages.size());
 	colliderUniformData.resize(swapChainImages.size());
+	pointsUniformData.resize(swapChainImages.size());
 	//view matrix
 	normalUBOAlignment = sizeof(UniformBufferObject);
 	if (minUboAlignment > 0) {
@@ -573,11 +606,14 @@ void VulkanAPI::createUniformBuffers()
 	}
 	bufferSize += normalUBOAlignment;
 	colliderBufferSize += normalUBOAlignment;
+	pointBufferSize += normalUBOAlignment;
 
 	uniformBuffers.resize(swapChainImages.size());
 	uniformBuffersMemory.resize(swapChainImages.size());
 	colliderUniformBuffers.resize(swapChainImages.size());
 	colliderUniformBuffersMemory.resize(swapChainImages.size());
+	pointUniformBuffer.resize(swapChainImages.size());
+	pointUniformBufferMemory.resize(swapChainImages.size());
 
 	for (size_t i = 0; i < swapChainImages.size(); ++i)
 	{
@@ -588,6 +624,10 @@ void VulkanAPI::createUniformBuffers()
 		createBuffer(colliderBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
 			VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, colliderUniformBuffers[i], colliderUniformBuffersMemory[i]);
 		vkMapMemory(device, colliderUniformBuffersMemory[i], 0, colliderBufferSize, 0, &colliderUniformData[i]);
+
+		createBuffer(pointBufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+			VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, pointUniformBuffer[i], pointUniformBufferMemory[i]);
+		vkMapMemory(device, pointUniformBufferMemory[i], 0, pointBufferSize, 0, &pointsUniformData[i]);
 	}
 }
 
@@ -639,15 +679,15 @@ void VulkanAPI::createDescriptorPool()
 {
 	std::array<VkDescriptorPoolSize, 2> poolSizes = {};
 	poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-	poolSizes[0].descriptorCount = static_cast<uint32_t>(swapChainImages.size())*2;
+	poolSizes[0].descriptorCount = static_cast<uint32_t>(swapChainImages.size())*3;
 	poolSizes[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-	poolSizes[1].descriptorCount = static_cast<uint32_t>(swapChainImages.size())*2;
+	poolSizes[1].descriptorCount = static_cast<uint32_t>(swapChainImages.size())*3;
 
 	VkDescriptorPoolCreateInfo poolInfo = {};
 	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
 	poolInfo.pPoolSizes = poolSizes.data();
-	poolInfo.maxSets = static_cast<uint32_t>(swapChainImages.size())*2;
+	poolInfo.maxSets = static_cast<uint32_t>(swapChainImages.size()) * 3;
 
 	if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
 	{
@@ -694,6 +734,12 @@ void VulkanAPI::createDescriptorSet()
 		throw std::runtime_error("failed to allocate descriptor sets");
 	}
 
+	debugPointdescriptorSets.resize(swapChainImages.size());
+	if (vkAllocateDescriptorSets(device, &allocInfo, debugPointdescriptorSets.data()) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to allocate descriptor sets");
+	}
+
 	for (size_t i = 0; i < swapChainImages.size(); ++i)
 	{
 		VkDescriptorBufferInfo bufferInfo = {};
@@ -718,7 +764,17 @@ void VulkanAPI::createDescriptorSet()
 		debugDynamicBufferInfo.offset = normalUBOAlignment;
 		debugDynamicBufferInfo.range = dynamicAlignment;
 
-		std::array<VkWriteDescriptorSet, 4> descriptorWrites = {};
+		VkDescriptorBufferInfo debugPointBufferInfo = {};
+		debugPointBufferInfo.buffer = pointUniformBuffer[i];
+		debugPointBufferInfo.offset = 0;
+		debugPointBufferInfo.range = normalUBOAlignment;
+
+		VkDescriptorBufferInfo debugPointDynamicBufferInfo = {};
+		debugPointDynamicBufferInfo.buffer = pointUniformBuffer[i];
+		debugPointDynamicBufferInfo.offset = normalUBOAlignment;
+		debugPointDynamicBufferInfo.range = dynamicAlignment;
+
+		std::array<VkWriteDescriptorSet, 6> descriptorWrites = {};
 		descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 		descriptorWrites[0].dstSet = descriptorSets[i];
 		descriptorWrites[0].dstBinding = 0;
@@ -754,6 +810,24 @@ void VulkanAPI::createDescriptorSet()
 		descriptorWrites[3].descriptorCount = 1;
 		descriptorWrites[3].pBufferInfo = &debugDynamicBufferInfo;
 		descriptorWrites[3].pTexelBufferView = nullptr;
+
+		descriptorWrites[4].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[4].dstSet = debugPointdescriptorSets[i];
+		descriptorWrites[4].dstBinding = 0;
+		descriptorWrites[4].dstArrayElement = 0;
+		descriptorWrites[4].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		descriptorWrites[4].descriptorCount = 1;
+		descriptorWrites[4].pBufferInfo = &debugPointBufferInfo;
+		descriptorWrites[4].pTexelBufferView = nullptr;
+
+		descriptorWrites[5].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[5].dstSet = debugPointdescriptorSets[i];
+		descriptorWrites[5].dstBinding = 1;
+		descriptorWrites[5].dstArrayElement = 0;
+		descriptorWrites[5].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+		descriptorWrites[5].descriptorCount = 1;
+		descriptorWrites[5].pBufferInfo = &debugPointDynamicBufferInfo;
+		descriptorWrites[5].pTexelBufferView = nullptr;
 
 		vkUpdateDescriptorSets(device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 	}
@@ -857,11 +931,12 @@ void VulkanAPI::updateUniformBuffer(uint32_t currentImage)
 	glm::vec4 view_up = *cameraTransform * glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
 	glm::vec4 view_pos = *cameraTransform * glm::vec4(cameraOffset, 1.0f);
 	ubo.view = glm::lookAt(glm::vec3(view_pos), glm::vec3(view_pos + view_dir), glm::vec3(view_up));
-	ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 100.0f);
+	ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 1000.0f);
 	ubo.proj[1][1] *= -1;
 
 	memcpy(dynamicUniformData[currentImage], &ubo, sizeof(UniformBufferObject));
 	memcpy(colliderUniformData[currentImage], &ubo, sizeof(UniformBufferObject));
+	memcpy(pointsUniformData[currentImage], &ubo, sizeof(UniformBufferObject));
 
 	uint32_t index = 0;
 	for (auto &dynamicUBO : uboDynamic)
@@ -877,6 +952,15 @@ void VulkanAPI::updateUniformBuffer(uint32_t currentImage)
 		memcpy(data, ubo.second.model, ubo.second.inversePtr.size() * dynamicAlignment);
 		++index;
 	}
+
+	for (size_t i = 0; i < points.size(); ++i)
+	{
+		//std::cout << points[i].x << ", " << points[i].y << ", "<<points[i].z<<std::endl;
+		glm::mat4* m = (glm::mat4*)(((uint64_t)pointTransforms + (i * dynamicAlignment)));
+		*m = glm::translate(glm::mat4(1.0f), points[i])*glm::scale(glm::mat4(1.0f),glm::vec3(0.1f));
+	}
+	void* data = reinterpret_cast<size_t*>(pointsUniformData[currentImage]) + normalUBOAlignment / sizeof(size_t);
+	memcpy(data, pointTransforms, points.size() * dynamicAlignment);
 	// Flush to make changes visible to the host 
 	//VkMappedMemoryRange memoryRange = {};
 	//memoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
@@ -1579,6 +1663,13 @@ void VulkanAPI::createGraphicsPipeline()
 		throw std::runtime_error("failed to create degbug line pipeline!");
 	}
 
+	rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+
+	if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &debugPointPipeline) != VK_SUCCESS)
+	{
+		throw std::runtime_error("failed to create degbug line pipeline!");
+	}
+
 	vkDestroyShaderModule(device, fragShaderModule, nullptr);
 	vkDestroyShaderModule(device, vertShaderModule, nullptr);
 }
@@ -1975,6 +2066,21 @@ void VulkanAPI::UpdateCommandBuffers()
 				vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>((*colliderUBO.second.mMesh).indices.size()), 1, 0, 0, 0);
 			}
 			++k;
+		}
+		
+		// draw debug points
+		drawDebug = 2;
+		uint32_t vID = uboCollider[SPHERE].vertexID;
+		vkCmdPushConstants(commandBuffers[i], pipelineLayout, VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(uint32_t), &drawDebug);
+		vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, debugPointPipeline);
+		vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, &vertexIndexBuffers[vID], offsets);
+		vkCmdBindIndexBuffer(commandBuffers[i], vertexIndexBuffers[vID], sizeof((*(uboCollider[SPHERE].mMesh)).vertices[0])*(*(uboCollider[SPHERE].mMesh)).vertices.size(), VK_INDEX_TYPE_UINT32);
+		for (uint32_t j = 0; j < points.size(); ++j)
+		{
+			uint32_t dynamicOffset = j * static_cast<uint32_t>(dynamicAlignment);
+			VkDescriptorSet sets[2] = { debugPointdescriptorSets[i] , textureInfos[0].descriptorSet };
+			vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 2, sets, 1, &dynamicOffset);
+			vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>((*(uboCollider[SPHERE].mMesh)).indices.size()), 1, 0, 0, 0);
 		}
 
 		vkCmdEndRenderPass(commandBuffers[i]);

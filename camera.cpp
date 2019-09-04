@@ -8,7 +8,7 @@ void Camera::Start()
 	VulkanAPI::GetInstance()->cameraOffset = glm::vec3(0.0f,2.0f,0.0f);
 	ComponentManager::GetInstance()->
 		mTransforms[ComponentManager::GetInstance()->
-		mEntities[mOwner].mComponents[TRANSFORM]].localPosition = glm::vec3(2.0f,2.0f,10.0f);
+		mEntities[mOwner].mComponents[TRANSFORM]].localPosition = glm::vec3(-2.0f,10.0f,100.0f);
 	ComponentManager::GetInstance()->
 		mTransforms[ComponentManager::GetInstance()->
 		mEntities[mOwner].mComponents[TRANSFORM]].localScale = glm::vec3(1.0f, 1.0f, 1.0f);

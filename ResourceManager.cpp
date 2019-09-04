@@ -175,9 +175,9 @@ MeshData * ResourceManager::SphereMesh()
 		float s = i * 2.0f*PI / float(n * 2);
 		for (unsigned int j = 0; j <= n; j++) {
 			float t = j * PI / float(n);
-			float x = 0.5f*cosf(s)*sinf(t);
-			float y = 0.5f*sinf(s)*sinf(t);
-			float z = 0.5f*cosf(t);
+			float x = cosf(s)*sinf(t);
+			float y = sinf(s)*sinf(t);
+			float z = cosf(t);
 			meshdata->vertices.push_back(VertexData(glm::vec3 (x, y, z),
 				glm::vec3(x, y, z),
 				glm::vec2(s / (2 * PI), t / PI)));

@@ -6,7 +6,7 @@ class Transform :public Component
 {
 public:
 	Transform();
-	~Transform(){}
+	~Transform();
 	void Start() override;
 	void Update(float deltaTime) override;
 	void Serialize(XMLElement* _element) override;
@@ -23,7 +23,8 @@ public:
 	glm::vec3 worldScale;
 	glm::vec3 localScale;
 	glm::mat4* transMatrix;
-
+	glm::mat3 rotationMatrix;
+	glm::mat3 invRotationMatrix;
 	MeshData* mMesh;
 	uint32_t textureID;
 };

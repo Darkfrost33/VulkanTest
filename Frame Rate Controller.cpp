@@ -41,6 +41,7 @@ void FrameRateController::FrameEnd()
 	while (time < mNeededTicksPerFrame)
 	{
 		mTickEnd = std::chrono::high_resolution_clock::now();
+		time = std::chrono::duration<float, std::chrono::seconds::period>(mTickEnd - mTickStart).count();
 	}
 	mFrameTime = time;
 }

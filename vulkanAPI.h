@@ -138,6 +138,8 @@ public:
 
 	std::unordered_map<MeshData*, DynamicUBO> uboDynamic;
 	std::map<COLLIDER_TYPE, DynamicColliderUBO> uboCollider;
+	glm::mat4* pointTransforms;
+
 	float frameTimer;
 	float frameCounter = 0.0f;
 
@@ -160,6 +162,9 @@ public:
 	std::vector<VkBuffer> vertexIndexBuffers;
 	std::vector<VkDeviceMemory> vertexIndexBufferMemorys;
 
+	//VkBuffer pointBuffer;
+	//VkDeviceMemory pointBufferMemory;
+
 	VkBuffer instanceBuffer;
 	VkDeviceMemory instanceBufferMemory;
 	std::vector<VkBuffer> uniformBuffers;
@@ -168,6 +173,11 @@ public:
 	std::vector<VkDeviceMemory> colliderUniformBuffersMemory;
 	std::vector<void*> dynamicUniformData;
 	std::vector<void*> colliderUniformData;
+	std::vector<void*> pointsUniformData;
+
+	std::vector<glm::vec3> points;
+	std::vector<VkBuffer> pointUniformBuffer;
+	std::vector<VkDeviceMemory> pointUniformBufferMemory;
 
 	size_t dynamicAlignment;
 	size_t normalUBOAlignment;
@@ -177,6 +187,7 @@ public:
 	VkPipelineLayout pipelineLayout;
 	VkPipeline graphicsPipeline;
 	VkPipeline debugLinePipeline;
+	VkPipeline debugPointPipeline;
 
 	VkCommandPool commandPool;
 	std::vector<VkCommandBuffer> commandBuffers;
@@ -187,6 +198,7 @@ public:
 	VkDescriptorPool textureDescriptorPool;
 	std::vector<VkDescriptorSet> descriptorSets;
 	std::vector<VkDescriptorSet> debugLinedescriptorSets;
+	std::vector<VkDescriptorSet> debugPointdescriptorSets;
 	//VkDescriptorSet textureDescriptorSets;
 
 	VkSemaphore imageAvailableSemaphores;

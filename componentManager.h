@@ -59,29 +59,3 @@ private:
 	bool addingGameObject;
 	bool deletingGameObject;
 };
-
-class Contact
-{
-public:
-	Contact() {
-		mpColliders[0] = nullptr;
-		mpColliders[1] = nullptr;
-	}
-	Collider* mpColliders[2];
-};
-
-class CollisionManager
-{
-public:
-	CollisionManager();
-	~CollisionManager();
-
-	void Reset();
-	// generate to push into the contacts
-	bool CheckConllisionAndGenerateContact(Collider *pCo1, Collider *pCo2);
-
-	std::list<Contact*> mContacts;
-private:
-	// 2D array of function pointer, used to store the collision functions' address
-	bool(*CollisionFunctions[COLLIDER_TYPE::COLLIDER_TYPE_NUM][COLLIDER_TYPE::COLLIDER_TYPE_NUM])(Collider *pCo1, Collider *pCo2, std::list<Contact*> &Contacts);
-};

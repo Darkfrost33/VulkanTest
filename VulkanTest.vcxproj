@@ -164,6 +164,7 @@
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="componentManager.cpp" />
     <ClCompile Include="controller.cpp" />
+    <ClCompile Include="DynamicTree.cpp" />
     <ClCompile Include="Frame Rate Controller.cpp" />
     <ClCompile Include="gameManager.cpp" />
     <ClCompile Include="imGui\imgui.cpp" />
@@ -178,6 +179,7 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">pch.h</PrecompiledHeaderFile>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="physicsManager.cpp" />
     <ClCompile Include="ResourceManager.cpp" />
     <ClCompile Include="transform.cpp" />
     <ClCompile Include="vulkanAPI.cpp" />
@@ -189,6 +191,7 @@
     <ClInclude Include="component.h" />
     <ClInclude Include="componentManager.h" />
     <ClInclude Include="controller.h" />
+    <ClInclude Include="DynamicTree.h" />
     <ClInclude Include="entity.h" />
     <ClInclude Include="Frame Rate Controller.h" />
     <ClInclude Include="gameManager.h" />
@@ -202,6 +205,7 @@
     <ClInclude Include="KeyName.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="physicsManager.h" />
     <ClInclude Include="ResourceManager.h" />
     <ClInclude Include="Singleton.h" />
     <ClInclude Include="transform.h" />

@@ -14,8 +14,11 @@ layout(location = 0) out vec4 outColor;
 void main() {
 	if(constant.debugLine == 0){
 		outColor = vec4(fragColor*texture(texSampler,fragTexCoord).rgb ,1.0);
-	}else
+	}else if(constant.debugLine == 1)
 	{
 		outColor = vec4(0.0,1.0,0.0,1.0);
+	}else if(constant.debugLine == 2)
+	{
+		outColor = vec4(1.0,0.0,0.0,1.0);
 	}
 }
