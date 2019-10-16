@@ -119,9 +119,12 @@ void Body::applyImpulse(const glm::vec3 & impulse, const glm::vec3 & rel_pos)
 void Body::updateInertiaTensor()
 {
 	glm::mat3& transform = mTrans->rotationMatrix;
-	glm::mat3 scaledTr = glm::mat3(
-		transform[0][0] * invInertia.x, transform[1][0] * invInertia.y, transform[2][0] * invInertia.z,
-		transform[0][1] * invInertia.x, transform[1][1] * invInertia.y, transform[2][1] * invInertia.z,
-		transform[0][2] * invInertia.x, transform[1][2] * invInertia.y, transform[2][2] * invInertia.z);
-	invInertiaTensor = scaledTr * glm::transpose(transform);
+	glm::mat3 IneriaTensor = glm::mat3(invInertia.x, 0.0f,0.0f,
+										0.0f,invInertia.y, 0.0f,
+										0.0f,0.0f,invInertia.z);
+	//glm::mat3 scaledTr = glm::mat3(
+	//	transform[0][0] * invInertia.x, transform[1][0] * invInertia.y, transform[2][0] * invInertia.z,
+	//	transform[0][1] * invInertia.x, transform[1][1] * invInertia.y, transform[2][1] * invInertia.z,
+	//	transform[0][2] * invInertia.x, transform[1][2] * invInertia.y, transform[2][2] * invInertia.z);
+	invInertiaTensor = transform*IneriaTensor * glm::transpose(transform);
 }

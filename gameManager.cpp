@@ -97,34 +97,35 @@ void GameManager::CreateGameObjects()
 	//	uint32_t newGameObjectID = pComponentManager->newComponent(ENTITY);
 	//	uint32_t newComponent = pComponentManager->newComponent(newGameObjectID, TRANSFORM);
 	//	pComponentManager->mTransforms[newComponent].GetTextureID("Textures/2k_earth.jpg");
-	//	pComponentManager->mTransforms[newComponent].localPosition = glm::vec3(-10.0f, 2.0f, 0.f);
+	//	pComponentManager->mTransforms[newComponent].localPosition = glm::vec3(0.0f, 10.0f, 0.f);
 	//	//newComponent = pComponentManager->newComponent(newGameObjectID, CONTROLLER);
 	//	newComponent = pComponentManager->newComponent(newGameObjectID, MESH);
 	//	pComponentManager->mMeshes[newComponent].BindMesh("sphere");
 	//	newComponent = pComponentManager->newComponent(newGameObjectID, BODY);
 	//	ComponentManager::GetInstance()->mBodies[newComponent].mass = 10.0f;
-	//	ComponentManager::GetInstance()->mBodies[newComponent].vel = glm::vec3(10.0f, 0.0f, 0.0f);
+	//	//ComponentManager::GetInstance()->mBodies[newComponent].vel = glm::vec3(10.0f, 0.0f, 0.0f);
+	//	ComponentManager::GetInstance()->mBodies[newComponent].Kinematic = true;
 	//	newComponent = pComponentManager->newComponent(newGameObjectID, COLLIDER);
 	//	pComponentManager->mColliders[newComponent].type = SPHERE;
 	//	pComponentManager->mColliders[newComponent].radius = 1.0f;
 	//	pComponentManager->StartComponents(newGameObjectID);
 	//}
-	//{
-	//	uint32_t newGameObjectID = pComponentManager->newComponent(ENTITY);
-	//	uint32_t newComponent = pComponentManager->newComponent(newGameObjectID, TRANSFORM);
-	//	pComponentManager->mTransforms[newComponent].GetTextureID("Textures/2k_earth.jpg");
-	//	pComponentManager->mTransforms[newComponent].localPosition = glm::vec3(1.0f, 10.0f, -2.f);
-	//	newComponent = pComponentManager->newComponent(newGameObjectID, MESH);
-	//	pComponentManager->mMeshes[newComponent].BindMesh("sphere");
-	//	newComponent = pComponentManager->newComponent(newGameObjectID, BODY);
-	//	//ComponentManager::GetInstance()->mBodies[newComponent].restitution = 0.4f;
-	//	ComponentManager::GetInstance()->mBodies[newComponent].mass = 10.0f;
-	//	//ComponentManager::GetInstance()->mBodies[newComponent].vel = glm::vec3(0.0f,-10.0f,0.0f);
-	//	newComponent = pComponentManager->newComponent(newGameObjectID, COLLIDER);
-	//	pComponentManager->mColliders[newComponent].type = SPHERE;
-	//	pComponentManager->mColliders[newComponent].radius = 1.0f;
-	//	pComponentManager->StartComponents(newGameObjectID);
-	//}
+	{
+		uint32_t newGameObjectID = pComponentManager->newComponent(ENTITY);
+		uint32_t newComponent = pComponentManager->newComponent(newGameObjectID, TRANSFORM);
+		pComponentManager->mTransforms[newComponent].GetTextureID("Textures/2k_earth.jpg");
+		pComponentManager->mTransforms[newComponent].localPosition = glm::vec3(0.0f, 20.0f, 0.f);
+		newComponent = pComponentManager->newComponent(newGameObjectID, MESH);
+		pComponentManager->mMeshes[newComponent].BindMesh("sphere");
+		newComponent = pComponentManager->newComponent(newGameObjectID, BODY);
+		//ComponentManager::GetInstance()->mBodies[newComponent].restitution = 0.4f;
+		ComponentManager::GetInstance()->mBodies[newComponent].mass = 10.0f;
+		ComponentManager::GetInstance()->mBodies[newComponent].vel = glm::vec3(0.0f,-10.0f,0.0f);
+		newComponent = pComponentManager->newComponent(newGameObjectID, COLLIDER);
+		pComponentManager->mColliders[newComponent].type = SPHERE;
+		pComponentManager->mColliders[newComponent].radius = 5.0f;
+		pComponentManager->StartComponents(newGameObjectID);
+	}
 	//{
 	//	uint32_t newGameObjectID = pComponentManager->newComponent(ENTITY);
 	//	uint32_t newComponent = pComponentManager->newComponent(newGameObjectID, TRANSFORM);

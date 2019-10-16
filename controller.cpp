@@ -5,7 +5,7 @@
 const float controllerSpeed = 50.0f;
 const float viewSpeedX = 50.0f;
 const float viewSpeedY = 20.0f;
-int index = 0;
+int index = 5;
 Controller::Controller()
 {
 	mTrans = nullptr;
@@ -111,12 +111,13 @@ void Controller::Update(float deltaTime)
 			uint32_t newComponent = ComponentManager::GetInstance()->newComponent(newGameObjectID, TRANSFORM);
 			ComponentManager::GetInstance()->mTransforms[newComponent].localPosition = glm::vec3(0.f, 5.1f*index, 0.f); // glm::vec3(0.0f, 2.f, 0.f);
 			ComponentManager::GetInstance()->mTransforms[newComponent].localScale = glm::vec3(10.f, 5.0f, 10.f); // glm::vec3(0.0f, 2.f, 0.f);
-			ComponentManager::GetInstance()->mTransforms[newComponent].localRotation *= glm::quat(glm::radians(glm::vec3(0.0f, 0.0f, 0.f)));
+			ComponentManager::GetInstance()->mTransforms[newComponent].localRotation *= glm::quat(glm::radians(glm::vec3(60.0f, 0.0f, 0.f)));
 			ComponentManager::GetInstance()->mTransforms[newComponent].GetTextureID("Textures/texture.jpg");
 			newComponent = ComponentManager::GetInstance()->newComponent(newGameObjectID, MESH);
 			ComponentManager::GetInstance()->mMeshes[newComponent].BindMesh("box");
 			newComponent = ComponentManager::GetInstance()->newComponent(newGameObjectID, BODY);
 			ComponentManager::GetInstance()->mBodies[newComponent].mass = 500.0f-30*index;
+			ComponentManager::GetInstance()->mBodies[newComponent].vel = glm::vec3(0.0f, -100.0f, 0.0f);
 			newComponent = ComponentManager::GetInstance()->newComponent(newGameObjectID, COLLIDER);
 			ComponentManager::GetInstance()->mColliders[newComponent].type = BOX;
 			ComponentManager::GetInstance()->mColliders[newComponent].length = 10.0f;

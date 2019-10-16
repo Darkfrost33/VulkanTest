@@ -33,7 +33,7 @@ public:
 	ContactPoint m_contactList[MAX_CONTACT_NUM];
 	ContactPoint* m_contactListPtr[MAX_CONTACT_NUM];
 	int m_contactsNum;
-	uint32_t m_lifeTime;// decrease
+	int32_t m_lifeTime;// decrease
 	Manifold():alreadyCheck(true),m_contactsNum(0), m_lifeTime(60){
 		for (int i = 0; i < MAX_CONTACT_NUM; ++i)
 		{

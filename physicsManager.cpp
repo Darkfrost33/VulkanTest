@@ -948,6 +948,7 @@ void CollisionManager::Resolve(float deltaTime)
 	// warmstarting
 	for (auto m : mManifolds)
 	{
+		std::cout << m->m_contactsNum << std::endl;
 		Body* bodyA = m->bodyA;
 		Body* bodyB = m->bodyB;
 
@@ -994,7 +995,7 @@ void CollisionManager::Resolve(float deltaTime)
 				glm::vec3 rel_pos1 = globalPositionA - bodyA->mTrans->worldPosition;
 				glm::vec3 rel_pos2 = globalPositionB - bodyB->mTrans->worldPosition;
 
-				float rel_vel = glm::dot(c->contactNormal, bodyA->getVelocity(rel_pos1) - bodyB->getVelocity(rel_pos1));
+				float rel_vel = glm::dot(c->contactNormal, bodyA->getVelocity(rel_pos1) - bodyB->getVelocity(rel_pos2));
 
 				//if (rel_vel < 0)
 				{

@@ -99,79 +99,79 @@ inline void DynamicTree::Query(T* callback, const AABB& aabb) const
 template<typename T>
 inline void DynamicTree::Raycast(T * callback, const RayCastInput & input) const
 {
-	glm::vec3 p1 = input.p1;
-	glm::vec3 p2 = input.p2;
-	glm::vec3 r = p2 - p1;
-	assert(glm::length2(r) > 0.0f);
-	r.Normalize();
+	//glm::vec3 p1 = input.p1;
+	//glm::vec3 p2 = input.p2;
+	//glm::vec3 r = p2 - p1;
+	//assert(glm::length2(r) > 0.0f);
+	//r.normalize();
 
-	// v is perpendicular to the segment.
-	glm::vec3 v = b2Cross(1.0f, r);
-	glm::vec3 abs_v = b2Abs(v);
+	//// v is perpendicular to the segment.
+	//glm::vec3 v = b2Cross(1.0f, r);
+	//glm::vec3 abs_v = b2Abs(v);
 
-	// Separating axis for segment (Gino, p80).
-	// |dot(v, p1 - c)| > dot(|v|, h)
+	//// Separating axis for segment (Gino, p80).
+	//// |dot(v, p1 - c)| > dot(|v|, h)
 
-	float maxFraction = input.maxFraction;
+	//float maxFraction = input.maxFraction;
 
-	// Build a bounding box for the segment.
-	AABB segmentAABB;
-	{
-		glm::vec3 t = p1 + maxFraction * (p2 - p1);
-		segmentAABB.lowerBound = glm::vec3(std::min(p1.x,t.x), std::min(p1.y, t.y), std::min(p1.z, t.z));
-		segmentAABB.upperBound = glm::vec3(std::max(p1.x, t.x), std::max(p1.y, t.y), std::max(p1.z, t.z));
-	}
+	//// Build a bounding box for the segment.
+	//AABB segmentAABB;
+	//{
+	//	glm::vec3 t = p1 + maxFraction * (p2 - p1);
+	//	segmentAABB.lowerBound = glm::vec3(std::min(p1.x,t.x), std::min(p1.y, t.y), std::min(p1.z, t.z));
+	//	segmentAABB.upperBound = glm::vec3(std::max(p1.x, t.x), std::max(p1.y, t.y), std::max(p1.z, t.z));
+	//}
 
-	std::stack<int32_t> stack;
-	stack.push(m_root);
+	//std::stack<int32_t> stack;
+	//stack.push(m_root);
 
-	while (!stack.empty())
-	{
-		int32_t nodeId = stack.top();
-		stack.pop();
-		if (nodeId == nullNode)
-		{
-			continue;
-		}
+	//while (!stack.empty())
+	//{
+	//	int32_t nodeId = stack.top();
+	//	stack.pop();
+	//	if (nodeId == nullNode)
+	//	{
+	//		continue;
+	//	}
 
-		const treeNode* node = m_nodes + nodeId;
+	//	const treeNode* node = m_nodes + nodeId;
 
-		if (TestAABBOverlap(node->aabb, segmentAABB) == false)
-		{
-			continue;
-		}
-		
-		// test ray and boundingbox
-		//...
+	//	if (TestAABBOverlap(node->aabb, segmentAABB) == false)
+	//	{
+	//		continue;
+	//	}
+	//	
+	//	// test ray and boundingbox
+	//	//...
 
-		if (node->IsLeaf())
-		{
-			RayCastInput subInput;
-			subInput.p1 = input.p1;
-			subInput.p2 = input.p2;
-			subInput.maxFraction = maxFraction;
+	//	if (node->IsLeaf())
+	//	{
+	//		RayCastInput subInput;
+	//		subInput.p1 = input.p1;
+	//		subInput.p2 = input.p2;
+	//		subInput.maxFraction = maxFraction;
 
-			float value = callback->RayCastCallback(subInput, nodeId);
+	//		float value = callback->RayCastCallback(subInput, nodeId);
 
-			if (value == 0.0f)
-			{
-				// The client has terminated the ray cast.
-				return;
-			}
+	//		if (value == 0.0f)
+	//		{
+	//			// The client has terminated the ray cast.
+	//			return;
+	//		}
 
-			if (value > 0.0f)
-			{
-				// Update segment bounding box.
-				maxFraction = value;
-				glm::vec3 t = p1 + maxFraction * (p2 - p1);
-				segmentAABB.lowerBound = glm::vec3(std::min(p1.x, t.x), std::min(p1.y, t.y), std::min(p1.z, t.z));
-				segmentAABB.upperBound = glm::vec3(std::max(p1.x, t.x), std::max(p1.y, t.y), std::max(p1.z, t.z));
-			}
-		}
-		else
-		{
-			stack.Push(node->child1);
-			stack.Push(node->child2);
-		}
-	}
+	//		if (value > 0.0f)
+	//		{
+	//			// Update segment bounding box.
+	//			maxFraction = value;
+	//			glm::vec3 t = p1 + maxFraction * (p2 - p1);
+	//			segmentAABB.lowerBound = glm::vec3(std::min(p1.x, t.x), std::min(p1.y, t.y), std::min(p1.z, t.z));
+	//			segmentAABB.upperBound = glm::vec3(std::max(p1.x, t.x), std::max(p1.y, t.y), std::max(p1.z, t.z));
+	//		}
+	//	}
+	//	else
+	//	{
+	//		stack.push(node->child1);
+	//		stack.push(node->child2);
+	//	}
+	//}
 }
